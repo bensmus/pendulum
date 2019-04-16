@@ -1,5 +1,6 @@
 import pygame
-from time import sleep
+import time
+import speckClass
 pygame.init()
 WHITE = 255, 255, 255; BLACK = 0, 0, 0
 screen = pygame.display.set_mode((600, 800))
@@ -17,19 +18,29 @@ x = 100
 y0 = 100
 a = 20
 
+specklist = []
+
 def yGet(y0, a, t):
     # Down is positive in this coordinate system
     y = y0 + a * 0.5 * t ** 2
     return int(y)
 
 # 50 fps, 8 seconds, 400 frames
-for f in range(400):
+for f in range(450):
     clock.tick(fps)
     screen.fill(WHITE)
-    t = f/50
+    t = f/50 + 1
+
     y = yGet(y0, a, t)
-    pygame.draw.circle(screen, BLACK, (x, y), 8)
+    pygame.draw.circle(screen, BLACK, (x, y), 20)
+
+    if f % 4 == 0:
+        specklist.append(speckClass.Speck(x, y, t))
+
+    for speck in specklist:
+        speck.draw(screen, t)
+
     pygame.display.update()
 
-sleep(1)
+time.sleep(1)
 pygame.quit()
