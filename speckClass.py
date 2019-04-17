@@ -8,14 +8,14 @@ class Speck:
     It will fade from black to white
     '''
 
-    def __init__(self, xcircle, ycircle, t0):
+    def __init__(self, xcenter, ycenter, t0):
         self.t0 = t0
 
         edge = random.randint(10, 15)
-        xavg = xcircle - edge // 2
-        yavg = ycircle - edge // 2 - 20
-        x = xavg + random.randint(-3, 3)
-        y = yavg + random.randint(-3, 3)
+        xleft = xcenter - edge // 2
+        ytop = ycenter - edge // 2 - 20
+        x = xleft + random.randint(-3, 3)
+        y = ytop + random.randint(-3, 3)
 
         self.rect = pygame.Rect(x, y, edge, edge)
 
