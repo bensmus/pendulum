@@ -1,13 +1,10 @@
 import pygame
 import math
-import time
-import random
 pygame.init()
 
 WHITE = 255, 255, 255; BLACK = 0, 0, 0
 screen = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
-specklist = []
 
 def getXY(len, angle):
     'Coordinate system is relative to y axis'
@@ -17,11 +14,15 @@ def getXY(len, angle):
 
 
 def angleAccelGrav(grav, len, angle):
+    'Angular acceleration due to gravity'
+    'dependent on angle'
     angle_accel = - grav / len * math.sin(angle)
     return angle_accel
 
 
 def angleAccelDrag(C, w):
+    'Angular acceleration due to drag'
+    'dependent on angular velocity'
     if w > 0:
         angle_accel = - C * w ** 2
     else:
@@ -30,6 +31,7 @@ def angleAccelDrag(C, w):
 
 
 def angleAccelUser(pressedPos, pressedNeg, w):
+    'Angular acceleration due to user arrow key presses'
     angle_accel = 0
     if pressedPos:
         angle_accel = 100
@@ -39,14 +41,14 @@ def angleAccelUser(pressedPos, pressedNeg, w):
 
 
 len = 100
-angle = math.pi / 2
-w = 3
+angle = math.pi / 2  # starting angle
+w = 3  # starting angular velocity
 x0 = 200
 y0 = 200
-grav = 100
-C = 0.07
+grav = 100  # gravity field strength
+C = 0.07  # drag coefficient
 
-time.sleep(1)
+
 running = True
 while running:
     pressedPos = pressedNeg = False
@@ -65,20 +67,20 @@ while running:
             elif event.key == pygame.K_s:
                 pressedNeg = True
 
-    ### update the angle ###
+    # update the angle #
     angle_accel = angleAccelGrav(grav, len, angle) + angleAccelDrag(C, w) \
     + angleAccelUser(pressedPos, pressedNeg, w)
 
     w += angle_accel * dt
     angle += w * dt
-    ########################
+    ####
 
+    # draw the circles and the line #
     x, y = getXY(len, angle)
     pygame.draw.line(screen, BLACK, [x0, y0], [x + x0, y + y0], 5)
     pygame.draw.circle(screen, BLACK, (int(x + x0), int(y + y0)), 10)
     pygame.draw.circle(screen, BLACK, (x0, y0), 10)
     pygame.display.update()
-    print(pressedNeg)
+    ####
 
-print(angle_accel)
 pygame.quit()
