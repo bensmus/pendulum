@@ -2,27 +2,31 @@ import pygame
 import math
 pygame.init()
 
+# TODO
+    # explain w and s, show when w and s pressed
+    # also slider to adjust drag 
+
 WHITE = 255, 255, 255; BLACK = 0, 0, 0
 screen = pygame.display.set_mode((400, 400))
 clock = pygame.time.Clock()
 
 def getXY(len, angle):
-    'Coordinate system is relative to y axis'
+    """Coordinate system is relative to y axis"""
     x = len * math.sin(angle)
     y = len * math.cos(angle)
     return x, y
 
 
 def angleAccelGrav(grav, len, angle):
-    'Angular acceleration due to gravity'
-    'dependent on angle'
+    """Angular acceleration due to gravity
+    dependent on angle"""
     angle_accel = - grav / len * math.sin(angle)
     return angle_accel
 
 
 def angleAccelDrag(C, w):
-    'Angular acceleration due to drag'
-    'dependent on angular velocity'
+    """Angular acceleration due to drag
+    dependent on angular velocity"""
     if w > 0:
         angle_accel = - C * w ** 2
     else:
@@ -31,7 +35,7 @@ def angleAccelDrag(C, w):
 
 
 def angleAccelUser(pressedPos, pressedNeg, w):
-    'Angular acceleration due to user arrow key presses'
+    """Angular acceleration due to user arrow key presses"""
     angle_accel = 0
     if pressedPos:
         angle_accel = 100
@@ -45,8 +49,8 @@ angle = math.pi / 2  # starting angle
 w = 3  # starting angular velocity
 x0 = 200
 y0 = 200
-grav = 100  # gravity field strength
-C = 0.07  # drag coefficient
+grav = 200  # gravity field strength
+C = 0.1  # drag coefficient
 
 
 running = True
