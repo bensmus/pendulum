@@ -9,13 +9,27 @@ pygame.init()
 WHITE = 255, 255, 255
 BLACK = 0, 0, 0
 WIDTH = 600
-HEIGHT = 800
+HEIGHT = 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 CLOCK = pygame.time.Clock()
-ACCEL = 20
+
+# First layer is drawn on first and is further away, falls slower
+ACCELS = [5, 20, 45]
+
+# First layer is smaller
+SIZES = [8, 12, 16]
+
+# Each layer has a different alpha
+ALPHAS = [120, 120, 200]
 
 LAYERS = [pygame.surface.Surface((WIDTH, HEIGHT)) for i in range(3)]
 
+# Layers after the base layer only blit non-white pixels
+for LAYER in LAYERS[1:]:
+    LAYER.set_colorkey(WHITE)
+
+for i, LAYER in enumerate(LAYERS):
+    LAYER.set_alpha(ALPHAS[i])
 
 def hsv_to_rgb255(hsv) -> Iterable:
     return np.round(np.array(colorsys.hsv_to_rgb(*hsv)) * 255)
@@ -31,17 +45,20 @@ class Speck:
         self.time_birth = time.time()
         self.layer = layer
 
-        edge = random.randint(5, 10)  # min and max edge size
+        # speck sizes half those of balls
+        edge = random.randint(SIZES[layer]/2-2, SIZES[layer]/2+2)  # min and max edge size
+
         xleft = xcenter - edge // 2
         ytop = ycenter - edge // 2
         x = xleft + random.randint(-3, 3)
         y = ytop + random.randint(-3, 3)
+        hue_range = 0.1
 
         self.rect = pygame.Rect(x, y, edge, edge)
 
         # random hue for HSV color with maximum value and saturation
         # python colorsys HSV and RGB uses color values between 0 and 1
-        hue = base_hue + random.random()*0.3
+        hue = base_hue + random.random()*hue_range
         self.hsv_color = np.array([hue, 1, 1])
         self.lifetime = 1
 
@@ -58,7 +75,7 @@ class Speck:
 class Ball:
     """Each ball has specks that are associated with it"""
 
-    def __init__(self, x0, y0, layer, base_hue) -> None:
+    def __init__(self, layer, x0, y0, base_hue) -> None:
         self.time_birth = time.time()
         self.x0 = x0
         self.y0 = y0
@@ -71,9 +88,9 @@ class Ball:
         time_elapsed = time.time() - self.time_birth
 
         v0 = 100
-        self.y = self.y0 + ACCEL * 0.5 * time_elapsed ** 2 + v0 * time_elapsed
+        self.y = self.y0 + ACCELS[self.layer] * 0.5 * time_elapsed ** 2 + v0 * time_elapsed
         pygame.draw.rect(LAYERS[self.layer], hsv_to_rgb255(
-            (self.base_hue, 1, 1)), (self.x0 - 10, self.y - 10, 20, 20))
+            (self.base_hue, 1, 1)), (self.x0 - 10, self.y - 10, SIZES[self.layer], SIZES[self.layer]))
 
         # adding speck
         print(time_elapsed)
@@ -87,30 +104,35 @@ class Ball:
 
 
 def randomBall():
+    layer = random.randint(0, 2)
     x0 = random.randint(30, WIDTH - 30)
     y0 = 0
-    layer = random.randint(0, 2)
     base_hue = random.random()
-    return Ball(x0, y0, layer, base_hue)
+    return Ball(layer, x0, y0, base_hue)
 
 
 if __name__ == '__main__':
-    ball = Ball(30, -20, 2, 0.5)
     balls = []
     running = True
     while running:
         SCREEN.fill(WHITE)
+        for LAYER in LAYERS:
+            LAYER.fill(WHITE)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        ball.draw()
-        # if random.random() < 0.05:
-        #     balls.append(Ball())
+        for i, ball in enumerate(balls):
+            ball.draw()
+            if ball.y > 2 * HEIGHT:  # saving memory
+                balls.pop(i)
+
+        if random.random() < 0.02:
+            balls.append(randomBall())
 
         # draw the three layers
-        for layer in LAYERS:
-            SCREEN.blit(layer, (0, 0))
+        for LAYER in LAYERS:
+            SCREEN.blit(LAYER, (0, 0))
 
         pygame.display.update()
     pygame.quit()
