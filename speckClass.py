@@ -127,7 +127,7 @@ if __name__ == '__main__':
             if ball.y > 2 * HEIGHT:  # saving memory
                 balls.pop(i)
 
-        if random.random() < 0.02:
+        if random.random() < 0.05:
             balls.append(randomBall())
 
         # draw the three layers
